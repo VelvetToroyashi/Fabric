@@ -1,29 +1,31 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
 using FabricLang.Exceptions;
+using FabricLang.Types;
 using FabricLang.Utilities;
 
 namespace FabricLang
 {
     public class Lexer
     {
-        private int _position = -1;
-        private char? _currentChar = null;
+        private Position _position;
+        private char? _currentChar;
         private readonly string _text;
-        public Lexer(string text)
+        public Lexer(string text, string fileName)
         {
             _text = text;
+            _position = new(-1, 0, -1, fileName, text);
+            
             Advance();
         }
 
         public void Advance()
         {
-            _position++;
-            _currentChar = _position >= _text.Length ? null : _text[_position];
+            _position.Advance(_currentChar);
+            _currentChar = _position.Index >= _text.Length ? null : _text[_position.Index];
         }
         
-        private char? PeekAdvance() => _position + 1 >= _text.Length ? null : _text[_position + 1];
+        private char? PeekAdvance() => _position.Index + 1 >= _text.Length ? null : _text[_position.Index];
 
         public (List<Token>, Exception?) CreateTokens()
         {
@@ -40,22 +42,22 @@ namespace FabricLang
                     switch (_currentChar)
                     {
                         case '+':
-                            result = new(TokenType.Plus, null);
+                            result = new(TokenType.Plus);
                             break;
                         case '-':
-                            result = new(TokenType.Minus, null);
+                            result = new(TokenType.Minus);
                             break;
                         case '*':
-                            result = new(TokenType.Multiply, null);
+                            result = new(TokenType.Multiply);
                             break;
                         case '/':
-                            result = new(TokenType.Divide, null);
+                            result = new(TokenType.Divide);
                             break;
                         case '(':
-                            result = new(TokenType.LeftParen, null);
+                            result = new(TokenType.LeftParen);
                             break;
                         case ')':
-                            result = new(TokenType.RightParen, null);
+                            result = new(TokenType.RightParen);
                             break;
                         default:
                             result = null;
@@ -68,8 +70,11 @@ namespace FabricLang
                         {
                             try { result = MakeNumber(); }
                             catch (InvalidTypeException te)
-                            { return (new(), te); }
+                            {
+                                return (new(), te);
+                            }
                         }
+                        else return (new(), new LexerException(typeof(IllegalCharacterException), $"Unknown character '{_currentChar}'", _position.Index, _position.FileName));
                     }
                     tokens.Add(result!);
                     Advance();
@@ -89,8 +94,8 @@ namespace FabricLang
                 {
                     decimalCount++;
                     if (decimalCount > 1)
-                        throw new InvalidTypeException("Numerical values cannot have more than one decimal point.");
-                    else value += _currentChar;
+                        throw new LexerException(typeof(InvalidOperationException), "Numerical values cannot have more than one decimal point.", _position.Index, _position.FileName);
+                    value += _currentChar;
                 }
                 else
                 {
