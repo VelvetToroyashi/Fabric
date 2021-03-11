@@ -1,3 +1,3 @@
 ﻿using FabricLang;
 
-_ = new Lexer("").Run();
+while (true) { }
