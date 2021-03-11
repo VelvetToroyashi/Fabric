@@ -17,7 +17,7 @@ namespace FabricLang.Exceptions
             _message = message;
         }
 
-        public override string ToString() => $"A(n) {_exceptionType.Name} occured while lexing: {_message}\n At: Line";
+        public override string ToString() => $"A(n) {_exceptionType.Name} occured while lexing: {_message}\n At: position {_posStart}";
 
     }
 }

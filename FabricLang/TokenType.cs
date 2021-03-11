@@ -2,12 +2,13 @@
 {
     public enum TokenType
     {
+        Unknown,
         Int,
         Float,
         Plus,
         Minus,
-        Multiply,
         Divide,
+        Multiply,
         LeftParen,
         RightParen
     }
