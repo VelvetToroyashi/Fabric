@@ -3,6 +3,8 @@
     public enum TokenType
     {
         Unknown,
+        Whitespace,
+        Eof,
         Int,
         Float,
         Plus,
